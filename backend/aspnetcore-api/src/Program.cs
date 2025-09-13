@@ -1,51 +1,51 @@
 using FaturamentoApi.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
+using System.Text.Json.Serialization; // Importante para o ReferenceHandler
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configuração do CORS (Mais Permissiva para Desenvolvimento)
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
-        });
-});
-
-// 2. Configuração do Banco de Dados
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// 3. Configuração do JSON (Para evitar referências circulares)
+// --- Configuração dos Controllers com a Serialização JSON CORRIGIDA ---
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
+        // ESTA É A MUDANÇA: IgnoreCycles resolve o loop e gera um JSON limpo.
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.WriteIndented = true;
     });
+// -------------------------------------------------------------------
 
-// 4. Swagger
+// Configuração do CORS
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:5173") // Use a porta do seu Vue
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+                      });
+});
+
+// Configuração do Banco de Dados
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString)
+);
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// 5. Middlewares na ORDEM CORRETA
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseDeveloperExceptionPage();
 }
 
-app.UseCors("AllowFrontend"); // ← PRIMEIRO!
-app.UseRouting();             // ← Adicione isso se não estiver usando
+app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

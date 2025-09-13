@@ -1,18 +1,18 @@
 <script setup lang="ts">
-// Este componente apenas recebe a lista de operações e a exibe.
-// Ele não tem lógica complexa.
+import type { Operacao } from '../types';
 
+// Define que este componente espera receber uma propriedade chamada 'operacoes',
+// que deve ser uma lista de objetos do tipo Operacao.
 defineProps<{
-  operacoes: { id: number, nome: string, descricao: string | null }[]
+  operacoes: Operacao[]
 }>();
 </script>
 
 <template>
   <div class="bg-white p-6 rounded-xl shadow-lg transition-shadow hover:shadow-2xl">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Lista de Operações</h1>
-    
+    <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Operações Cadastradas</h2>
     <div class="overflow-x-auto">
-      <table class="min-w-full bg-white">
+       <table class="min-w-full bg-white">
         <thead class="bg-gray-800 text-white">
           <tr>
             <th class="py-3 px-4 uppercase font-semibold text-sm text-left">ID</th>
@@ -31,3 +31,4 @@ defineProps<{
     </div>
   </div>
 </template>
+

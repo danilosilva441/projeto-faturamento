@@ -1,70 +1,48 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+// Importa as definições de tipo e as funções da API que criámos
+import type { Operacao, Faturamento } from './types';
+import { getOperacoes, getFaturamentos } from './services/apiService';
 
-// Importa os três componentes que formam a nossa página.
+// Importa os componentes filhos que vamos usar no template
 import FormularioCadastro from './components/FormularioCadastro.vue';
 import OperacoesLista from './components/OperacoesLista.vue';
 import FaturamentosLista from './components/FaturamentosLista.vue';
 
-// --- ESTADO CENTRAL DA APLICAÇÃO ---
-const API_URL = 'http://localhost:5013/api';
-
-interface Operacao {
-  id: number;
-  nome: string;
-  descricao: string | null;
-}
-
-interface Faturamento {
-  id: number;
-  data: string;
-  valor: number;
-  operacao: { nome: string } | null;
-}
-
+// Variáveis centrais que guardam os dados da aplicação
 const operacoes = ref<Operacao[]>([]);
-const faturamentos = ref<Faturamento[]>([]); // Nova lista para os faturamentos
+const faturamentos = ref<Faturamento[]>([]);
 const erroApi = ref<string | null>(null);
-const carregando = ref<boolean>(true);
+const carregando = ref(true);
 
-// --- FUNÇÕES DE INTERAÇÃO COM A API ---
-
-// Busca a lista de operações
-async function buscarOperacoes() {
-  const response = await axios.get(`${API_URL}/operacoes`);
-  operacoes.value = response.data;
-}
-
-// Busca a lista de faturamentos
-async function buscarFaturamentos() {
-  const response = await axios.get(`${API_URL}/faturamentos`);
-  faturamentos.value = response.data;
-}
-
-// Ao carregar a página, busca todos os dados necessários em paralelo.
-onMounted(async () => {
+// Função para carregar todos os dados da API quando a página abre
+async function carregarDados() {
   try {
-    carregando.value = true;
-    await Promise.all([
-      buscarOperacoes(),
-      buscarFaturamentos()
+    // Busca operações e faturamentos ao mesmo tempo para ser mais rápido
+    const [operacoesData, faturamentosData] = await Promise.all([
+      getOperacoes(),
+      getFaturamentos()
     ]);
+    operacoes.value = operacoesData;
+    faturamentos.value = faturamentosData;
   } catch (error) {
     console.error('Falha ao carregar dados iniciais:', error);
-    erroApi.value = 'Não foi possível carregar os dados. Verifique se a API backend está rodando.';
+    erroApi.value = 'Não foi possível carregar os dados da API.';
   } finally {
     carregando.value = false;
   }
-});
-
-// --- ATUALIZAÇÃO EM TEMPO REAL ---
-// Esta função é chamada pelo evento do formulário e recarrega a lista de faturamentos.
-function handleFaturamentoCadastrado() {
-  console.log('Novo faturamento cadastrado! Recarregando a lista...');
-  buscarFaturamentos(); 
 }
 
+// Roda a função acima assim que a página é montada
+onMounted(carregarDados);
+
+// Função que é chamada QUANDO o FormularioCadastro nos avisa que um item foi criado
+function handleFaturamentoCadastrado() {
+  // Apenas recarrega a lista de faturamentos para mostrar o novo item
+  getFaturamentos().then(data => {
+    faturamentos.value = data;
+  });
+}
 </script>
 
 <template>
@@ -76,6 +54,7 @@ function handleFaturamentoCadastrado() {
         <p class="text-slate-600 mt-2">Uma aplicação Full-Stack com .NET, Vue e Docker.</p>
       </header>
       
+      <!-- Mensagens de Carregando e Erro -->
       <div v-if="carregando" class="text-center py-8">
         <p class="text-lg text-gray-500 animate-pulse">Carregando dados da API...</p>
       </div>
@@ -84,18 +63,24 @@ function handleFaturamentoCadastrado() {
         <p>{{ erroApi }}</p>
       </div>
 
+      <!-- Corpo principal da aplicação, onde os componentes são usados -->
       <div v-else class="space-y-8">
-        
+        <!-- 
+          Componente do Formulário 
+          :operacoes="operacoes" -> "Filho, aqui está a lista de operações que você precisa."
+          @faturamento-cadastrado -> "Filho, quando você terminar de cadastrar, me avise chamando a função 'handleFaturamentoCadastrado'."
+        -->
         <FormularioCadastro 
           :operacoes="operacoes" 
           @faturamento-cadastrado="handleFaturamentoCadastrado" 
         />
-
+        <!-- Componente da Lista de Faturamentos -->
         <FaturamentosLista :faturamentos="faturamentos" />
-
+        <!-- Componente da Lista de Operações -->
         <OperacoesLista :operacoes="operacoes" />
       </div>
 
     </div>
   </div>
 </template>
+

@@ -1,17 +1,13 @@
 <script setup lang="ts">
-// Define as "props" que o componente espera receber do componente pai (App.vue).
+import type { Faturamento } from '../types';
+
+// Define que este componente espera receber uma propriedade chamada 'faturamentos',
+// que deve ser uma lista de objetos do tipo Faturamento.
 defineProps<{
-  faturamentos: {
-    id: number,
-    data: string,
-    valor: number,
-    operacao: {
-      nome: string
-    } | null
-  }[]
+  faturamentos: Faturamento[]
 }>();
 
-// Função auxiliar para formatar números como moeda (R$).
+// Função para formatar o valor como R$ 1.234,56
 function formatarMoeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
@@ -20,12 +16,9 @@ function formatarMoeda(valor: number) {
 <template>
   <div class="bg-white p-6 rounded-xl shadow-lg transition-shadow hover:shadow-2xl">
     <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Últimos Lançamentos</h2>
-    
     <div v-if="!faturamentos.length" class="text-center py-8 text-gray-500">
       <p>Nenhum faturamento cadastrado ainda.</p>
-      <p class="text-sm">Use o formulário acima para adicionar o primeiro!</p>
     </div>
-
     <div v-else class="overflow-x-auto">
       <table class="min-w-full bg-white">
         <thead class="bg-gray-800 text-white">
@@ -46,3 +39,4 @@ function formatarMoeda(valor: number) {
     </div>
   </div>
 </template>
+
