@@ -2,57 +2,72 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
-// 1. Importa os novos componentes que criamos
+// Importa os três componentes que formam a nossa página.
 import FormularioCadastro from './components/FormularioCadastro.vue';
 import OperacoesLista from './components/OperacoesLista.vue';
+import FaturamentosLista from './components/FaturamentosLista.vue';
 
-// --- DEFINIÇÕES E ESTADO PRINCIPAL ---
-// Apenas o App.vue se preocupa com a URL da API e o estado geral (carregando, erro)
+// --- ESTADO CENTRAL DA APLICAÇÃO ---
 const API_URL = 'http://localhost:5013/api';
 
 interface Operacao {
   id: number;
   nome: string;
   descricao: string | null;
-  ativo: boolean;
-  criadoEm: string;
+}
+
+interface Faturamento {
+  id: number;
+  data: string;
+  valor: number;
+  operacao: { nome: string } | null;
 }
 
 const operacoes = ref<Operacao[]>([]);
+const faturamentos = ref<Faturamento[]>([]); // Nova lista para os faturamentos
 const erroApi = ref<string | null>(null);
 const carregando = ref<boolean>(true);
 
-// --- FUNÇÃO PARA BUSCAR OS DADOS ---
-// A responsabilidade de buscar dados é do componente pai
+// --- FUNÇÕES DE INTERAÇÃO COM A API ---
+
+// Busca a lista de operações
 async function buscarOperacoes() {
+  const response = await axios.get(`${API_URL}/operacoes`);
+  operacoes.value = response.data;
+}
+
+// Busca a lista de faturamentos
+async function buscarFaturamentos() {
+  const response = await axios.get(`${API_URL}/faturamentos`);
+  faturamentos.value = response.data;
+}
+
+// Ao carregar a página, busca todos os dados necessários em paralelo.
+onMounted(async () => {
   try {
-    erroApi.value = null; 
     carregando.value = true;
-    const response = await axios.get(`${API_URL}/operacoes`);
-    operacoes.value = response.data;
+    await Promise.all([
+      buscarOperacoes(),
+      buscarFaturamentos()
+    ]);
   } catch (error) {
-    console.error('Falha ao buscar operações:', error);
+    console.error('Falha ao carregar dados iniciais:', error);
     erroApi.value = 'Não foi possível carregar os dados. Verifique se a API backend está rodando.';
   } finally {
     carregando.value = false;
   }
-}
+});
 
-// Quando o App.vue é montado na tela, ele busca os dados iniciais
-onMounted(buscarOperacoes);
-
-// --- FUNÇÃO PARA LIDAR COM O EVENTO DO FILHO ---
-// Esta função é chamada quando o FormularioCadastro emite o evento 'faturamentoCadastrado'
-function handleFaturamentoCadastrado(novoFaturamento: any) {
-  console.log('Evento recebido no App.vue! Novo faturamento:', novoFaturamento);
-  // No futuro, podemos adicionar o novo faturamento a uma lista de "Últimos Lançamentos" aqui,
-  // ou simplesmente recarregar todos os dados.
+// --- ATUALIZAÇÃO EM TEMPO REAL ---
+// Esta função é chamada pelo evento do formulário e recarrega a lista de faturamentos.
+function handleFaturamentoCadastrado() {
+  console.log('Novo faturamento cadastrado! Recarregando a lista...');
+  buscarFaturamentos(); 
 }
 
 </script>
 
 <template>
-  <!-- O App.vue agora define o layout GERAL da página -->
   <div class="bg-gradient-to-br from-gray-50 to-slate-200 min-h-screen p-4 sm:p-8 font-sans">
     <div class="max-w-4xl mx-auto space-y-8">
       
@@ -61,7 +76,6 @@ function handleFaturamentoCadastrado(novoFaturamento: any) {
         <p class="text-slate-600 mt-2">Uma aplicação Full-Stack com .NET, Vue e Docker.</p>
       </header>
       
-      <!-- Mensagens Globais de Carregamento e Erro -->
       <div v-if="carregando" class="text-center py-8">
         <p class="text-lg text-gray-500 animate-pulse">Carregando dados da API...</p>
       </div>
@@ -70,23 +84,18 @@ function handleFaturamentoCadastrado(novoFaturamento: any) {
         <p>{{ erroApi }}</p>
       </div>
 
-      <!-- Usando os Componentes (se não houver erro de carregamento) -->
       <div v-else class="space-y-8">
         
-        <!-- O componente do formulário -->
-        <!-- :operacoes="operacoes" -> Passa a lista de operações como "prop" para o filho -->
-        <!-- @faturamento-cadastrado -> "Ouve" o evento do filho e chama nossa função handle... -->
         <FormularioCadastro 
           :operacoes="operacoes" 
           @faturamento-cadastrado="handleFaturamentoCadastrado" 
         />
 
-        <!-- O componente da lista -->
-        <!-- :operacoes="operacoes" -> Também passa a lista para o componente da tabela -->
+        <FaturamentosLista :faturamentos="faturamentos" />
+
         <OperacoesLista :operacoes="operacoes" />
       </div>
 
     </div>
   </div>
 </template>
-

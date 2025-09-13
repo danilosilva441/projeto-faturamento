@@ -33,10 +33,12 @@ namespace FaturamentoApi.Controllers
             // 1. await: "Espere" esta operação terminar sem travar.
             // 2. _context.Operacoes: "Pegue a tabela de Operações".
             // 3. .ToListAsync(): "Converta tudo para uma Lista C#". (TRADUÇÃO SQL: SELECT * FROM faturamento.operacoes)
-            var operacoes = await _context.Operacoes.ToListAsync();
+           // var operacoes = await _context.Operacoes.ToListAsync(); // <-- COMENTAMOS A LINHA ORIGINAL
+            
+            // ADICIONAMOS A NOVA LINHA DE TESTE:
+            return Ok("TESTE DE SANIDADE FUNCIONOU!");
 
-            // return Ok(operacoes): Retorna um código HTTP 200 (OK) e envia a lista de operações como JSON.
-            return Ok(operacoes);
+            // return Ok(operacoes); // <-- COMENTAMOS A LINHA ORIGINAL
         }
 
         // --- MÉTODO 2: BUSCAR UMA OPERAÇÃO POR ID ---
