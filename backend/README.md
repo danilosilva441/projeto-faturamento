@@ -1,60 +1,41 @@
-Backend - API de Faturamento em ASP.NET Core
-Esta pasta contém o projeto da API RESTful, que serve como o núcleo do sistema de faturamento. Ela é responsável por gerenciar toda a lógica de negócio, persistência de dados e segurança da aplicação.
+Backend API - Faturamento (.NET 8)
+Esta pasta contém a API REST principal do projeto, desenvolvida com ASP.NET Core 8. Ela é responsável por toda a lógica de negócio, interações com o banco de dados e por fornecer os dados para o frontend.
 
-Tecnologias e Padrões Utilizados
-Framework: ASP.NET Core 8
+Arquitetura e Padrões
+API RESTful: Endpoints bem definidos para cada recurso (/api/operacoes, /api/faturamentos).
 
-Linguagem: C#
+Entity Framework Core: Utilizado como ORM (Object-Relational Mapper) para a comunicação com o banco de dados PostgreSQL.
 
-Banco de Dados: PostgreSQL (gerenciado via Docker)
+Padrão de Repositório (implícito via DbContext): Centraliza o acesso aos dados.
 
-ORM (Object-Relational Mapper): Entity Framework Core 8
+Injeção de Dependência: Utilizada para gerir o ciclo de vida dos serviços, como o AppDbContext.
 
-Arquitetura: API RESTful com padrão de Controllers
+DTOs (Data Transfer Objects): Usados para validar e modelar os dados que entram e saem da API, garantindo segurança e um "contrato" claro com o frontend.
 
-Padrões de Projeto:
+Soft Delete: Nenhum registo de faturamento é realmente apagado do banco. Em vez disso, são marcados como inativos (ativo = false) para manter a integridade do histórico.
 
-DTOs (Data Transfer Objects): Para garantir que os "contratos" entre a API e o frontend sejam seguros e explícitos.
-
-Injeção de Dependência: Utilizada extensivamente para gerenciar serviços como o AppDbContext.
-
-Soft Delete: Nenhum registro financeiro é realmente apagado do banco. Em vez disso, eles são marcados como inativos (ativo = false), preservando a integridade e o histórico dos dados.
-
-Filtros Globais (EF Core): O DbContext é configurado para, por padrão, ignorar registros inativos em todas as consultas, simplificando a lógica nos controllers.
-
-Banco de Dados
-O esquema do banco de dados é projetado para ser simples e escalável, com as seguintes tabelas principais:
-
-faturamento.operacoes: Armazena as operações (ex: "Loja Centro", "Contrato X").
-
-faturamento.faturamentos: Guarda os lançamentos de faturamento diário, com uma restrição UNIQUE para impedir duplicidade (mesma operação, mesmo dia).
-
-faturamento.metas: Armazena as metas mensais por operação.
-
-faturamento.usuarios: Tabela para futuros usuários do sistema.
-
-O script de criação do schema e o seed (popular com dados de teste) estão localizados em ../infra/db/init/.
-
-Endpoints Principais da API
-A API expõe os seguintes recursos:
+Endpoints Principais Implementados
+A API atualmente expõe os seguintes endpoints:
 
 GET /api/operacoes: Retorna uma lista de todas as operações cadastradas.
 
 GET /api/operacoes/{id}: Retorna uma operação específica pelo seu ID.
 
-POST /api/faturamentos: Cria um novo lançamento de faturamento diário. Inclui validações para impedir datas futuras, valores zerados e duplicidade.
+GET /api/faturamentos: Retorna os últimos 50 faturamentos lançados, ordenados por data.
 
-PUT /api/faturamentos/{id}: Atualiza um lançamento existente (data ou valor).
+POST /api/faturamentos: Cadastra um novo lançamento de faturamento diário.
 
-DELETE /api/faturamentos/{id}: Realiza um "Soft Delete", marcando um lançamento como inativo.
+PUT /api/faturamentos/{id}: Atualiza um lançamento existente.
 
-Como Executar Apenas o Backend
-Garanta que o container do PostgreSQL (definido em ../infra/docker-compose.yml) esteja rodando.
+DELETE /api/faturamentos/{id}: Cancela (Soft Delete) um lançamento existente.
 
-Navegue até a pasta aspnetcore-api/src.
+Como Executar
+Certifique-se de que o container Docker do PostgreSQL (definido na pasta infra) está a rodar.
+
+Navegue até à pasta backend/aspnetcore-api/src.
 
 Execute o comando:
 
 dotnet run
 
-A documentação interativa da API (Swagger) estará disponível em http://localhost:[porta]/swagger.
+A API estará disponível em http://localhost:5013. Pode aceder à documentação interativa do Swagger em http://localhost:5013/swagger.

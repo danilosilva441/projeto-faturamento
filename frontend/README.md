@@ -1,43 +1,39 @@
-Frontend - Painel de Faturamento em Vue.js
-Esta pasta contém o projeto da Single-Page Application (SPA) que serve como a interface do usuário para o sistema de faturamento. A aplicação é moderna, reativa e construída com as melhores práticas do ecossistema Vue.js.
+Frontend - Painel de Faturamento (Vue 3)
+Esta pasta contém a interface do utilizador (UI) do projeto, desenvolvida com Vue 3, Vite e TypeScript. É uma Single-Page Application (SPA) que consome os dados fornecidos pela API .NET.
 
-Tecnologias e Ferramentas
-Framework: Vue.js 3 (com a Composition API)
+Arquitetura e Padrões
+Componentização: A aplicação é dividida em componentes reutilizáveis e com responsabilidades únicas (ex: FormularioCadastro.vue, FaturamentosLista.vue), orquestrados pelo componente principal App.vue.
 
-Build Tool: Vite (para desenvolvimento e build ultrarrápidos)
+Reatividade: Utiliza a Composition API do Vue 3 (ref, onMounted) para criar uma interface que se atualiza automaticamente em resposta a mudanças nos dados.
 
-Linguagem: TypeScript (para adicionar tipagem estática e segurança ao código)
+Separação de Responsabilidades:
 
-Estilização: TailwindCSS (um framework CSS "utility-first" para criar designs customizados rapidamente)
+services/apiService.ts: Centraliza toda a lógica de comunicação com o backend (usando axios).
 
-Requisições HTTP: Axios (para comunicação com a API backend)
+types/index.ts: Define as "interfaces" TypeScript, criando um "dicionário" para a forma dos dados (Operacao, Faturamento), o que garante segurança de tipos e ajuda a prevenir bugs.
 
-Gerenciador de Pacotes: Yarn
+Estilização Utilitária: Usa TailwindCSS para criar uma interface moderna e responsiva de forma rápida e consistente.
 
-Funcionalidades
-Atualmente, a aplicação consiste em uma tela principal que:
+Funcionalidades Implementadas
+Visualização da lista de operações cadastradas.
 
-Exibe o título "Painel de Faturamento".
+Visualização dos últimos faturamentos lançados.
 
-Ao ser carregada, faz uma chamada GET para o endpoint /api/operacoes do backend.
+Formulário para cadastro de novos faturamentos com validação de dados.
 
-Mostra uma mensagem de "Carregando..." enquanto espera a resposta da API.
+Atualização dinâmica da lista de faturamentos após um novo cadastro, proporcionando feedback em tempo real ao utilizador.
 
-Exibe uma mensagem de erro clara se a comunicação com o backend falhar (ex: API offline ou erro de CORS).
+Como Executar
+Certifique-se de que a API .NET (definida na pasta backend) está a rodar.
 
-Renderiza os dados recebidos em uma tabela estilizada, mostrando o ID, nome e descrição de cada operação.
+Navegue até à pasta frontend/vue-app.
 
-Como Executar Apenas o Frontend
-Pré-requisito: A API backend (../backend/aspnetcore-api) deve estar rodando, pois o frontend depende dela para buscar os dados.
-
-Navegue até a pasta vue-app.
-
-Se for a primeira vez, instale as dependências:
+Instale as dependências (apenas na primeira vez):
 
 yarn install
 
-Inicie o servidor de desenvolvimento:
+Inicie o servidor de desenvolvimento do Vite:
 
 yarn dev
 
-A aplicação estará disponível em http://localhost:5173 (ou a porta indicada no terminal). O Hot Reload está ativado, então qualquer alteração no código será refletida instantaneamente no navegador.
+Aceda à aplicação no endereço fornecido, que geralmente é http://localhost:5173.
