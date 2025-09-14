@@ -8,12 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // ESTA É A MUDANÇA: IgnoreCycles resolve o loop e gera um JSON limpo.
+        // ESTA É A MUDANÇA CRÍTICA:
+        // IgnoreCycles resolve o loop infinito E gera um JSON limpo e simples,
+        // exatamente como o nosso frontend espera.
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 // -------------------------------------------------------------------
 
-// Configuração do CORS
+// Configuração do CORS (já estava correta)
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
@@ -48,4 +50,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
