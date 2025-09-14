@@ -1,54 +1,63 @@
 Projeto de Faturamento e Previsões (Full-Stack)
-Este repositório contém o código-fonte de uma aplicação full-stack completa, projetada para registrar o faturamento diário de múltiplas operações, consolidar dados, comparar com metas e, futuramente, gerar previsões com base no histórico.
+Este repositório contém uma aplicação web full-stack completa para registo e análise de faturamentos diários. A aplicação permite aos utilizadores cadastrar lançamentos, visualizar dados históricos e, futuramente, obter previsões com base no histórico armazenado.
 
-O projeto serve como um case prático de arquitetura de software moderna, utilizando uma API robusta no backend, uma interface reativa no frontend e infraestrutura containerizada com Docker.
+Este projeto foi construído como uma demonstração de competências em arquitetura de software moderna, utilizando .NET para o backend, Vue.js para o frontend e Docker para a infraestrutura de banco de dados.
 
-Visão Geral da Arquitetura
-A aplicação é dividida em três grandes pilares que se comunicam entre si:
+Status do Projeto
+Fase 1 - Aplicação Principal (CRUD): CONCLUÍDA ✅
 
-Backend (API Principal): Desenvolvido em ASP.NET Core, é o cérebro do sistema. Responsável por todas as regras de negócio, validações, segurança e comunicação com o banco de dados.
+Backend API em .NET 8 com CRUD completo e robusto para operações e faturamentos.
 
-Frontend (Interface do Usuário): Uma Single-Page Application (SPA) desenvolvida com Vue.js 3 (usando Vite e TypeScript). É a interface com a qual o usuário interage, consumindo os dados fornecidos pela API. A estilização é feita com TailwindCSS.
+Frontend em Vue 3 com uma interface reativa para visualização e cadastro de dados.
 
-Infraestrutura (Banco de Dados & Orquestração): O banco de dados relacional PostgreSQL é executado dentro de um container Docker, garantindo um ambiente de desenvolvimento e produção consistente e isolado. O docker-compose orquestra os serviços.
+Banco de dados PostgreSQL a rodar num container Docker, com seed automático de dados.
 
-Estrutura de Pastas
-O projeto está organizado da seguinte forma para facilitar a manutenção e o desenvolvimento:
+Comunicação entre frontend e backend a funcionar perfeitamente.
 
-📁 /backend/: Contém todo o código-fonte da API em ASP.NET Core.
+Tecnologias Utilizadas
+Backend: ASP.NET Core 8, Entity Framework Core, C#
 
-📁 /aspnetcore-api/: O projeto principal da API.
+Frontend: Vue 3, TypeScript, Vite, TailwindCSS, Axios
 
-📁 /frontend/: Contém todo o código-fonte da aplicação Vue.js.
+Banco de Dados: PostgreSQL 15
 
-📁 /vue-app/: O projeto principal do frontend.
+Infraestrutura: Docker e Docker Compose
 
-📁 /infra/: Contém os arquivos de configuração do Docker e os scripts de inicialização do banco de dados.
+Como Executar o Projeto Localmente
+Para executar esta aplicação, você precisará ter o .NET SDK 8+, Node.js 18+ e o Docker Desktop instalados na sua máquina.
 
-📁 /docs/ (sugestão): Pasta para documentação adicional, diagramas de arquitetura, etc.
+Siga estes passos na ordem correta:
 
-Como Executar o Projeto Completo
-Para subir todo o ambiente (Backend, Frontend e Banco de Dados), você precisará ter o Docker Desktop e o SDK do .NET instalados.
+Clone o Repositório:
 
-Subir a Infraestrutura (Banco de Dados):
+git clone [https://github.com/danilosilva441/projeto-faturamento.git](https://github.com/danilosilva441/projeto-faturamento.git)
+cd projeto-faturamento
+
+Inicie o Banco de Dados (Docker):
+Navegue até à pasta infra e suba os containers do PostgreSQL e do pgAdmin.
 
 cd infra
 docker compose up -d
 
-Executar o Backend (API):
-Abra um novo terminal.
+Isto irá criar o banco de dados e populá-lo com dados de teste automaticamente.
+
+Inicie o Backend (API .NET):
+Abra um novo terminal, navegue até à pasta da API e inicie o servidor.
 
 cd backend/aspnetcore-api/src
 dotnet run
 
-A API estará rodando, geralmente em http://localhost:5013.
+O backend estará a rodar em http://localhost:5013.
 
-Executar o Frontend:
-Abra um terceiro terminal.
+Inicie o Frontend (Vue.js):
+Abra um terceiro terminal, navegue até à pasta do frontend, instale as dependências (apenas na primeira vez) e inicie o servidor de desenvolvimento.
 
 cd frontend/vue-app
+yarn install  # Apenas na primeira vez
 yarn dev
 
-A aplicação estará acessível, geralmente em http://localhost:5173.
+Aceda à Aplicação:
+Abra o seu navegador e aceda ao endereço fornecido pelo Vite, que geralmente é:
+http://localhost:5173
 
-Para mais detalhes sobre cada parte do projeto, consulte os arquivos README.md específicos dentro das pastas /backend e /frontend.
+Agora você deverá ver a aplicação completa e funcional no seu navegador!
