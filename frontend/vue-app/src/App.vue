@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import type { Operacao, Faturamento } from './types';
+import type { Operacao, Faturamento } from '../types';
 import { getOperacoes, getFaturamentos } from './services/apiService';
 
 // Importa TODOS os nossos componentes filhos
@@ -66,6 +66,7 @@ function handleFaturamentoCadastrado() {
         />
         
         <!-- O NOSSO NOVO PAINEL EM AÇÃO -->
+        <!-- Passamos a lista de operações para que ele possa preencher o seu dropdown -->
         <PainelAnalise :operacoes="operacoes" />
 
         <FaturamentosLista :faturamentos="faturamentos" />
@@ -75,4 +76,3 @@ function handleFaturamentoCadastrado() {
     </div>
   </div>
 </template>
-

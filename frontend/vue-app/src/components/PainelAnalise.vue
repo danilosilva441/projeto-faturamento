@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-// Importa as nossas ferramentas: a "forma" do objeto Operacao e a função para pedir a análise
-import type { Operacao, ResultadoAnalise } from '../types';
-import { getMediaDiaria } from '../services/apiService';
+// Importa todas as nossas ferramentas de tipo e de API
+import type { Operacao, ResultadoAnalise, ResultadoPrevisao } from '../types';
+import { getMediaDiaria, getPrevisaoFaturamento } from '../services/apiService';
 
 // Define que este componente espera receber a lista de operações do seu "chefe" (App.vue)
 defineProps<{
@@ -11,36 +11,42 @@ defineProps<{
 
 // --- Variáveis de Estado para controlar o componente ---
 const operacaoSelecionadaId = ref<number | null>(null);
-const resultado = ref<ResultadoAnalise | null>(null);
-const carregando = ref(false);
+const resultadoMedia = ref<ResultadoAnalise | null>(null);
+const resultadoPrevisao = ref<ResultadoPrevisao | null>(null); // Nova variável para a previsão
+const carregandoMedia = ref(false);
+const carregandoPrevisao = ref(false); // Novo estado de carregamento para a previsão
 const erro = ref<string | null>(null);
 
-// Função chamada quando o botão "Calcular Média" é clicado
+// --- Funções de Lógica ---
 async function calcularMedia() {
-  // Validação: Garante que o utilizador escolheu uma operação
   if (!operacaoSelecionadaId.value) {
-    erro.value = 'Por favor, selecione uma operação para calcular.';
-    return;
+    erro.value = 'Selecione uma operação.'; return;
   }
-
-  // Prepara o componente para a chamada de API
-  carregando.value = true;
-  erro.value = null;
-  resultado.value = null;
-
+  carregandoMedia.value = true; erro.value = null; resultadoMedia.value = null;
   try {
-    // Chama a nossa nova função do apiService
-    const data = await getMediaDiaria(operacaoSelecionadaId.value);
-    resultado.value = data; // Guarda o resultado para ser exibido na tela
-  } catch (error: any) {
-    console.error('Erro ao calcular média:', error);
-    erro.value = error.response?.data || 'Não foi possível calcular a média.';
+    resultadoMedia.value = await getMediaDiaria(operacaoSelecionadaId.value);
+  } catch (e: any) {
+    erro.value = e.response?.data || 'Erro ao calcular média.';
   } finally {
-    carregando.value = false; // Termina o estado de "carregando"
+    carregandoMedia.value = false;
   }
 }
 
-// Função auxiliar para formatar o resultado como moeda
+// Nova função para gerar a previsão
+async function gerarPrevisao() {
+  if (!operacaoSelecionadaId.value) {
+    erro.value = 'Selecione uma operação.'; return;
+  }
+  carregandoPrevisao.value = true; erro.value = null; resultadoPrevisao.value = null;
+  try {
+    resultadoPrevisao.value = await getPrevisaoFaturamento(operacaoSelecionadaId.value);
+  } catch (e: any) {
+    erro.value = e.response?.data || 'Erro ao gerar previsão.';
+  } finally {
+    carregandoPrevisao.value = false;
+  }
+}
+
 function formatarMoeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
@@ -48,43 +54,65 @@ function formatarMoeda(valor: number) {
 
 <template>
   <div class="bg-white p-6 rounded-xl shadow-lg transition-shadow hover:shadow-2xl">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Análise de Faturamento</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Análise e Previsões</h2>
     
     <div class="space-y-4">
-      <p class="text-sm text-gray-600">Selecione uma operação para calcular a média de faturamento diário com base nos dados históricos.</p>
+      <p class="text-sm text-gray-600">Selecione uma operação para executar cálculos com base nos dados históricos.</p>
       
-      <!-- Dropdown e Botão -->
-      <div class="flex flex-col sm:flex-row items-center gap-4">
+      <!-- Seletor de Operação -->
+      <div>
+        <label for="analise-operacao" class="block text-sm font-medium text-gray-700">Operação</label>
         <select 
+          id="analise-operacao"
           v-model="operacaoSelecionadaId"
-          class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
         >
           <option :value="null" disabled>Selecione uma operação</option>
           <option v-for="op in operacoes" :key="op.id" :value="op.id">
             {{ op.nome }}
           </option>
         </select>
+      </div>
 
+      <!-- Botões de Ação -->
+      <div class="flex flex-wrap gap-4">
         <button 
           @click="calcularMedia" 
-          :disabled="carregando"
-          class="w-full sm:w-auto flex justify-center items-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
+          :disabled="carregandoMedia"
+          class="flex-1 min-w-[150px] justify-center py-2 px-4 border rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 disabled:bg-gray-100"
         >
-          <span v-if="!carregando">Calcular Média</span>
+          <span v-if="!carregandoMedia">Calcular Média</span>
           <span v-else>Calculando...</span>
+        </button>
+        <button 
+          @click="gerarPrevisao" 
+          :disabled="carregandoPrevisao"
+          class="flex-1 min-w-[150px] justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400"
+        >
+          <span v-if="!carregandoPrevisao">Gerar Previsão (7 dias)</span>
+          <span v-else>Gerando...</span>
         </button>
       </div>
 
       <!-- Área de Resultados -->
-      <div v-if="resultado" class="mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-500 text-indigo-800 rounded-r-lg">
+      <div v-if="resultadoMedia" class="mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-500 text-indigo-800 rounded-r-lg">
         <p class="font-bold">Média de Faturamento Diário:</p>
-        <p class="text-2xl font-mono">{{ formatarMoeda(resultado.mediaCalculada) }}</p>
+        <p class="text-2xl font-mono">{{ formatarMoeda(resultadoMedia.mediaCalculada) }}</p>
+      </div>
+      
+      <!-- NOVA SECÇÃO DE PREVISÃO -->
+      <div v-if="resultadoPrevisao" class="mt-4 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+        <p class="font-bold text-green-800">Previsão de Faturamento (Próximos 7 dias):</p>
+        <ul class="mt-2 space-y-1 text-sm text-green-700">
+          <li v-for="item in resultadoPrevisao.previsao" :key="item.data" class="flex justify-between">
+            <span>{{ new Date(item.data).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' }) }}:</span>
+            <span class="font-mono font-semibold">{{ formatarMoeda(item.valorPrevisto) }}</span>
+          </li>
+        </ul>
       </div>
 
-      <!-- Mensagem de Erro -->
-      <div v-if="erro" class="mt-4 p-2 text-center bg-red-100 text-red-700 rounded-md">
-        {{ erro }}
-      </div>
+      <div v-if="erro" class="mt-4 p-2 text-center bg-red-100 text-red-700 rounded-md">{{ erro }}</div>
     </div>
   </div>
 </template>
+

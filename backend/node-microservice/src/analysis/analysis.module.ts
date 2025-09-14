@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AnalysisController } from './analysis.controller';
+// Importa o Service e o Controller a partir dos seus ficheiros corretos
 import { AnalysisService } from './analysis.service';
+import { AnalysisController } from './analysis.controller';
 
 @Module({
+  // Regista o Controller e o Service para que o NestJS saiba que eles existem
   controllers: [AnalysisController],
-  providers: [AnalysisService]
+  providers: [AnalysisService],
 })
 export class AnalysisModule {}
