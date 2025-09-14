@@ -1,28 +1,33 @@
 using FaturamentoApi.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization; // Importante para o ReferenceHandler
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Configuração dos Controllers com a Serialização JSON CORRIGIDA ---
+// --- INÍCIO DA CONFIGURAÇÃO DO HTTP CLIENT ---
+// Adiciona o serviço IHttpClientFactory, que gere os clientes HTTP.
+builder.Services.AddHttpClient("AnalysisService", client =>
+{
+    // Define o "endereço base" do nosso microserviço Node.js
+    client.BaseAddress = new Uri("http://localhost:3000/");
+});
+// --- FIM DA CONFIGURAÇÃO DO HTTP CLIENT ---
+
+// Configuração dos Controllers com a Serialização JSON
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // ESTA É A MUDANÇA CRÍTICA:
-        // IgnoreCycles resolve o loop infinito E gera um JSON limpo e simples,
-        // exatamente como o nosso frontend espera.
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
-// -------------------------------------------------------------------
 
-// Configuração do CORS (já estava correta)
+// Configuração do CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://localhost:5173") // Use a porta do seu Vue
+                          policy.WithOrigins("http://localhost:5173")
                                 .AllowAnyHeader()
                                 .AllowAnyMethod();
                       });
@@ -50,3 +55,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

@@ -1,24 +1,23 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-// Importa as definições de tipo e as funções da API que criámos
 import type { Operacao, Faturamento } from './types';
 import { getOperacoes, getFaturamentos } from './services/apiService';
 
-// Importa os componentes filhos que vamos usar no template
+// Importa TODOS os nossos componentes filhos
 import FormularioCadastro from './components/FormularioCadastro.vue';
 import OperacoesLista from './components/OperacoesLista.vue';
 import FaturamentosLista from './components/FaturamentosLista.vue';
+import PainelAnalise from './components/PainelAnalise.vue'; // <-- O NOVO COMPONENTE
 
-// Variáveis centrais que guardam os dados da aplicação
+// Estado central da aplicação (os dados que controlam tudo)
 const operacoes = ref<Operacao[]>([]);
 const faturamentos = ref<Faturamento[]>([]);
 const erroApi = ref<string | null>(null);
 const carregando = ref(true);
 
-// Função para carregar todos os dados da API quando a página abre
+// Função para carregar todos os dados da API
 async function carregarDados() {
   try {
-    // Busca operações e faturamentos ao mesmo tempo para ser mais rápido
     const [operacoesData, faturamentosData] = await Promise.all([
       getOperacoes(),
       getFaturamentos()
@@ -26,19 +25,16 @@ async function carregarDados() {
     operacoes.value = operacoesData;
     faturamentos.value = faturamentosData;
   } catch (error) {
-    console.error('Falha ao carregar dados iniciais:', error);
+    console.error('Falha ao carregar dados:', error);
     erroApi.value = 'Não foi possível carregar os dados da API.';
   } finally {
     carregando.value = false;
   }
 }
 
-// Roda a função acima assim que a página é montada
 onMounted(carregarDados);
 
-// Função que é chamada QUANDO o FormularioCadastro nos avisa que um item foi criado
 function handleFaturamentoCadastrado() {
-  // Apenas recarrega a lista de faturamentos para mostrar o novo item
   getFaturamentos().then(data => {
     faturamentos.value = data;
   });
@@ -51,10 +47,9 @@ function handleFaturamentoCadastrado() {
       
       <header class="text-center">
         <h1 class="text-4xl font-extrabold text-slate-800">Painel de Faturamento</h1>
-        <p class="text-slate-600 mt-2">Uma aplicação Full-Stack com .NET, Vue e Docker.</p>
+        <p class="text-slate-600 mt-2">Uma aplicação Full-Stack com .NET, Vue e Microserviço Node.js.</p>
       </header>
       
-      <!-- Mensagens de Carregando e Erro -->
       <div v-if="carregando" class="text-center py-8">
         <p class="text-lg text-gray-500 animate-pulse">Carregando dados da API...</p>
       </div>
@@ -63,20 +58,17 @@ function handleFaturamentoCadastrado() {
         <p>{{ erroApi }}</p>
       </div>
 
-      <!-- Corpo principal da aplicação, onde os componentes são usados -->
+      <!-- Aqui o "chefe" (App.vue) usa todos os seus "trabalhadores" -->
       <div v-else class="space-y-8">
-        <!-- 
-          Componente do Formulário 
-          :operacoes="operacoes" -> "Filho, aqui está a lista de operações que você precisa."
-          @faturamento-cadastrado -> "Filho, quando você terminar de cadastrar, me avise chamando a função 'handleFaturamentoCadastrado'."
-        -->
         <FormularioCadastro 
           :operacoes="operacoes" 
           @faturamento-cadastrado="handleFaturamentoCadastrado" 
         />
-        <!-- Componente da Lista de Faturamentos -->
+        
+        <!-- O NOSSO NOVO PAINEL EM AÇÃO -->
+        <PainelAnalise :operacoes="operacoes" />
+
         <FaturamentosLista :faturamentos="faturamentos" />
-        <!-- Componente da Lista de Operações -->
         <OperacoesLista :operacoes="operacoes" />
       </div>
 
