@@ -3,20 +3,19 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FaturamentoApi.Models
 {
-    // Mapeia esta classe para a tabela 'operacoes' no schema 'faturamento'
     [Table("operacoes", Schema = "faturamento")]
     public class Operacao
     {
-        [Key] // Marca como Chave Primária
-        [Column("id")] // Mapeia esta propriedade para a coluna 'id' do banco
+        [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        [Required] // Diz ao C# que este campo é obrigatório
+        [Required]
         [Column("nome")]
         public string Nome { get; set; } = string.Empty;
 
         [Column("descricao")]
-        public string? Descricao { get; set; } // O '?' permite que este campo seja nulo (já que é 'TEXT' no banco)
+        public string? Descricao { get; set; }
 
         [Column("ativo")]
         public bool Ativo { get; set; }
@@ -24,19 +23,12 @@ namespace FaturamentoApi.Models
         [Column("criado_em")]
         public DateTime CriadoEm { get; set; }
 
-        // --- Propriedades de Navegação (A Mágica do EF Core) ---
-        // Isso "ensina" ao C# que UMA Operacao pode ter MUITOS faturamentos.
-        // O 'virtual' ajuda o EF Core a otimizar o carregamento (Lazy Loading).
-        public virtual ICollection<FaturamentoDiario> Faturamentos { get; set; }
+        // --- NOVA PROPRIEDADE ---
+        [Column("meta_mensal")]
+        public decimal MetaMensal { get; set; }
 
-        // Isso "ensina" ao C# que UMA Operacao pode ter MUITAS metas.
-        public virtual ICollection<Meta> Metas { get; set; }
 
-        // Inicializamos as listas para evitar erros de "referência nula"
-        public Operacao()
-        {
-            Faturamentos = new List<FaturamentoDiario>();
-            Metas = new List<Meta>();
-        }
+        // Relação: Uma operação tem muitos faturamentos
+        public virtual ICollection<FaturamentoDiario> Faturamentos { get; set; } = new List<FaturamentoDiario>();
     }
 }

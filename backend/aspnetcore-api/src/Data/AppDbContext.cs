@@ -1,72 +1,41 @@
-using FaturamentoApi.Models; // Importa TODOS os nossos models
+using FaturamentoApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FaturamentoApi.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
-        }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
 
-        // --- REGISTRO DAS TABELAS (DbSets) ---
-        // Dizemos ao EF Core: "Você é responsável pela tabela 'Usuarios'"
+        // Mapeamento das tabelas para DbSets
         public DbSet<Usuario> Usuarios { get; set; }
-
-        // NOVOS REGISTROS:
         public DbSet<Operacao> Operacoes { get; set; }
         public DbSet<FaturamentoDiario> Faturamentos { get; set; }
-        public DbSet<Meta> Metas { get; set; }
+        // public DbSet<Meta> Metas { get; set; } // <-- REMOVEMOS ESTA LINHA
 
-
-        // --- CONFIGURAÇÃO FINA (Fluent API) ---
-        // Aqui configuramos detalhes que os [Atributos] nos models não conseguem
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Diz ao EF para usar o schema 'faturamento' como padrão para todas as tabelas
-            modelBuilder.HasDefaultSchema("faturamento");
             base.OnModelCreating(modelBuilder);
+            modelBuilder.HasDefaultSchema("faturamento");
 
-            // --- Configurando a entidade Operacao ---
+            // Entidade Operacao
             modelBuilder.Entity<Operacao>(entity =>
             {
-                // Configura a relação (Embora o EF já entenda isso pelas nossas propriedades de navegação, é bom ser explícito):
-
-                // "UMA Operacao TEM MUITOS Faturamentos"
-                entity.HasMany(operacao => operacao.Faturamentos)
-                      .WithOne(faturamento => faturamento.Operacao) // "Um Faturamento TEM UMA Operacao"
-                      .HasForeignKey(faturamento => faturamento.OperacaoId); // "A ligação é pela chave OperacaoId"
-
-                // "UMA Operacao TEM MUITAS Metas"
-                entity.HasMany(operacao => operacao.Metas)
-                      .WithOne(meta => meta.Operacao)
-                      .HasForeignKey(meta => meta.OperacaoId);
+                entity.HasMany(e => e.Faturamentos)
+                      .WithOne(f => f.Operacao)
+                      .HasForeignKey(f => f.OperacaoId);
+                
+                // Garante que o tipo de coluna 'meta_mensal' seja numeric(12, 2)
+                entity.Property(e => e.MetaMensal).HasColumnType("numeric(12, 2)");
             });
 
-            // --- Configurando a entidade FaturamentoDiario ---
+            // Entidade FaturamentoDiario
             modelBuilder.Entity<FaturamentoDiario>(entity =>
             {
-                // Garante que o EF use o tipo de coluna 'date' (e não timestamp)
-                entity.Property(f => f.Data).HasColumnType("date");
-
-                // Garante que o EF use o tipo exato do banco (precisão 12, 2 casas decimais)
-                entity.Property(f => f.Valor).HasColumnType("numeric(12, 2)");
-
-                // IMPORTANTE: Recria a regra UNIQUE que fizemos no SQL.
-                // Isso impede que alguém cadastre dois faturamentos para a MESMA operação no MESMO dia.
-                entity.HasIndex(f => new { f.OperacaoId, f.Data }).IsUnique();
-
-                // FILTRO GLOBAL (A MÁGICA):
-                // Isto adiciona "WHERE ativo = TRUE" em TODAS as consultas SELECT
-                // feitas para a tabela Faturamentos.
-                entity.HasQueryFilter(f => f.Ativo);
-            });
-
-            // --- Configurando a entidade Meta ---
-            modelBuilder.Entity<Meta>(entity =>
-            {
-                // Garante o tipo exato para o valor da meta.
-                entity.Property(m => m.ValorMeta).HasColumnType("numeric(12, 2)");
+                entity.Property(e => e.Valor).HasColumnType("numeric(12, 2)");
+                entity.Property(e => e.Data).HasColumnType("date");
+                entity.HasIndex(e => new { e.OperacaoId, e.Data }).IsUnique();
+                entity.HasQueryFilter(f => f.Ativo); 
             });
         }
     }
