@@ -38,7 +38,7 @@ namespace FaturamentoApi.Controllers
                 return BadRequest($"Falha ao conectar ou consultar: {ex.Message}");
             }
         }
-        
+
         [HttpGet("dados-completos")]
         public IActionResult GetDadosCompletos()
         {
@@ -50,7 +50,7 @@ namespace FaturamentoApi.Controllers
                 // 3. .Include(op => op.Metas) -> TRADUÇÃO: "Faça também um JOIN com a tabela Metas"
                 var operacoesComDados = _context.Operacoes
                                                 .Include(op => op.Faturamentos)
-                                                .Include(op => op.Metas)
+                                                .Include(op => op.MetaMensal)
                                                 .ToList(); // Executa a consulta no banco
 
                 if (!operacoesComDados.Any())
@@ -59,10 +59,11 @@ namespace FaturamentoApi.Controllers
                 }
 
                 // Para não poluir sua tela com 362 faturamentos, vamos retornar um resumo:
-                var resumo = operacoesComDados.Select(op => new {
+                var resumo = operacoesComDados.Select(op => new
+                {
                     operacaoNome = op.Nome,
                     totalFaturamentosRegistrados = op.Faturamentos.Count(), // Conta quantos faturamentos achou
-                    totalMetasRegistradas = op.Metas.Count(), // Conta quantas metas achou
+                     // Conta quantas metas achou
                     primeiroFaturamentoExemplo = op.Faturamentos.OrderBy(f => f.Data).FirstOrDefault()?.Valor
                 });
 
