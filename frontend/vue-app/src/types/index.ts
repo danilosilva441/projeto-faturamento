@@ -28,14 +28,6 @@ export interface ResultadoPrevisao {
   previsao: PrevisaoItem[];
 }
 
-export interface RespostaPaginada<T> {
-  totalItems: number;
-  paginaAtual: number;
-  totalPaginas: number;
-  items: T[];
-}
-
-// --- NOVA INTERFACE PARA O PROGRESSO DA META ---
 export interface ProgressoMeta {
   operacaoNome: string;
   metaMensal: number;
@@ -43,5 +35,15 @@ export interface ProgressoMeta {
   progressoPercentual: number;
   valorRestante: number;
   mesReferencia: string;
+}
+
+// --- NOVA INTERFACE PARA RESPOSTAS PAGINADAS ---
+// Esta é uma "interface genérica". O <T> significa que ela pode conter
+// uma lista de qualquer tipo (seja Faturamento, Operacao, etc.).
+export interface RespostaPaginada<T> {
+  totalItems: number;
+  paginaAtual: number;
+  totalPaginas: number;
+  items: T[]; // A lista de itens da página atual
 }
 
