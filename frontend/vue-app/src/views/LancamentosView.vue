@@ -5,10 +5,17 @@ import type { Faturamento, Operacao, RespostaPaginada } from '../types';
 import { getFaturamentos, getOperacoes } from '../services/apiService';
 
 // --- ESTADO DA PÁGINA ---
-// Variáveis reativas para guardar os dados e o estado da UI
+
+// 1. CORREÇÃO: Criamos uma interface dedicada para a paginação. É mais limpo que 'Omit'.
+interface PaginacaoState {
+  totalItems: number;
+  paginaAtual: number;
+  totalPaginas: number;
+}
+
 const faturamentos = ref<Faturamento[]>([]);
-const operacoes = ref<Operacao[]>([]); // Para preencher o dropdown de filtro
-const paginacaoInfo = ref<Omit<RespostaPaginada<any>, 'items'>>({
+const operacoes = ref<Operacao[]>([]);
+const paginacaoInfo = ref<PaginacaoState>({
   totalItems: 0,
   paginaAtual: 1,
   totalPaginas: 1,
@@ -16,8 +23,16 @@ const paginacaoInfo = ref<Omit<RespostaPaginada<any>, 'items'>>({
 const carregando = ref(true);
 const erro = ref<string | null>(null);
 
-// Objeto reativo para guardar os valores dos filtros selecionados pelo utilizador
-const filtros = ref({
+// Define a "forma" exata do nosso objeto de filtros
+interface FiltrosState {
+  operacaoId: number | null;
+  dataInicio: string | null;
+  dataFim: string | null;
+  pagina: number;
+}
+
+// Usa esta "forma" (FiltrosState) para tipar o nosso 'ref' corretamente.
+const filtros = ref<FiltrosState>({
   operacaoId: null,
   dataInicio: null,
   dataFim: null,
@@ -25,17 +40,15 @@ const filtros = ref({
 });
 
 // --- LÓGICA ---
-// Função principal para buscar os dados da API com base nos filtros atuais
 async function buscarLancamentos() {
   carregando.value = true;
   erro.value = null;
   try {
     const dados = await getFaturamentos({
-      ...filtros.value, // Envia todos os filtros para a API
+      ...filtros.value,
       tamanhoPagina: 15, // Define quantos itens por página
     });
     faturamentos.value = dados.items;
-    // Guarda as informações de paginação (exceto a lista de 'items')
     paginacaoInfo.value = {
       totalItems: dados.totalItems,
       paginaAtual: dados.paginaAtual,
@@ -49,14 +62,12 @@ async function buscarLancamentos() {
   }
 }
 
-// Função para mudar de página
 function mudarPagina(novaPagina: number) {
   if (novaPagina >= 1 && novaPagina <= paginacaoInfo.value.totalPaginas) {
     filtros.value.pagina = novaPagina;
   }
 }
 
-// Função para limpar os filtros e buscar novamente
 function limparFiltros() {
   filtros.value = {
     operacaoId: null,
@@ -66,18 +77,23 @@ function limparFiltros() {
   };
 }
 
-// "Vigia" (watch) o objeto de filtros. Se qualquer valor dentro dele mudar,
-// a função buscarLancamentos é chamada automaticamente.
+// "Vigia" os filtros. Se algo mudar, busca os dados novamente.
 watch(filtros, buscarLancamentos, { deep: true });
 
-// onMounted: Busca os dados iniciais (lançamentos e operações) quando a página carrega
+
+// 2. CORREÇÃO: O 'onMounted' agora usa apenas async/await, tornando o código mais limpo.
 onMounted(async () => {
-  buscarLancamentos();
-  // Busca as operações para preencher o dropdown de filtros
-  getOperacoes().then(data => operacoes.value = data);
+    try {
+        // Busca as operações para o dropdown
+        operacoes.value = await getOperacoes();
+        // E busca a primeira página de lançamentos
+        await buscarLancamentos();
+    } catch (e) {
+        erro.value = 'Não foi possível carregar os dados iniciais da página.';
+        console.error(e);
+    }
 });
 
-// Funções de formatação (iguais às que já tínhamos)
 function formatarMoeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }

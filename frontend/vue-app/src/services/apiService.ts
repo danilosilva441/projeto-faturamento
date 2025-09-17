@@ -1,6 +1,6 @@
 import axios from 'axios';
 // Importa os nossos tipos, incluindo a nova RespostaPaginada
-import type { Faturamento, Operacao, ProgressoMeta, RespostaPaginada, ResultadoAnalise, ResultadoPrevisao } from '../types';
+import type { Operacao, Faturamento, ResultadoAnalise, ResultadoPrevisao, RespostaPaginada, ProgressoMeta } from '../types';
 
 const API_URL = 'http://localhost:5013/api';
 

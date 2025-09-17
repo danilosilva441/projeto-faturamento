@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// A única coisa que este ficheiro precisa de importar são os componentes do router
 import { RouterLink, RouterView } from 'vue-router';
 </script>
 
@@ -26,6 +27,7 @@ import { RouterLink, RouterView } from 'vue-router';
     </aside>
 
     <main class="flex-1 overflow-y-auto p-8">
+      <!-- O router vai renderizar a página correta aqui -->
       <router-view />
     </main>
 
