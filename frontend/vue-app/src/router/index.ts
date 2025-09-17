@@ -1,23 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router';
-// Importa os componentes que representarão as nossas páginas
 import HomeView from '../views/HomeView.vue';
 import LancamentosView from '../views/LancamentosView.vue';
 import OperacoesView from '../views/OperacoesView.vue';
 
-// Define as rotas (os "endereços" da nossa aplicação)
 const routes = [
   {
-    path: '/', // O endereço principal (ex: http://localhost:5173/)
+    path: '/',
     name: 'Home',
-    component: HomeView, // Quando o utilizador estiver neste endereço, mostre o HomeView
+    component: HomeView,
   },
   {
-    path: '/lancamentos', // O endereço da lista de lançamentos
+    path: '/lancamentos',
     name: 'Lancamentos',
     component: LancamentosView,
   },
   {
-    path: '/operacoes', // O novo endereço para gestão de operações
+    path: '/operacoes',
     name: 'Operacoes',
     component: OperacoesView,
   },

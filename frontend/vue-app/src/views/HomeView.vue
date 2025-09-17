@@ -1,11 +1,7 @@
 <script setup lang="ts">
-// IMPORTANTE: Nós movemos toda a lógica que estava no App.vue para aqui.
-// Esta "View" agora é a responsável por carregar e exibir o painel principal.
 import { ref, onMounted } from 'vue';
 import type { Operacao, Faturamento } from '../types';
 import { getOperacoes, getFaturamentos } from '../services/apiService';
-
-// Importa os componentes "trabalhadores" que esta página usa
 import FormularioCadastro from '../components/FormularioCadastro.vue';
 import OperacoesLista from '../components/OperacoesLista.vue';
 import FaturamentosLista from '../components/FaturamentosLista.vue';
@@ -19,7 +15,6 @@ const carregando = ref(true);
 async function carregarDados() {
   carregando.value = true;
   try {
-    // Busca os dados em paralelo para ser mais rápido
     const [operacoesData, faturamentosData] = await Promise.all([
       getOperacoes(),
       getFaturamentos()
@@ -34,12 +29,9 @@ async function carregarDados() {
   }
 }
 
-// Carrega os dados assim que a página é montada no ecrã
 onMounted(carregarDados);
 
-// Função que é chamada quando o formulário avisa que um novo faturamento foi criado
 function handleFaturamentoCadastrado() {
-  // Apenas busca a lista de faturamentos novamente para mostrar o item novo
   getFaturamentos().then(data => {
     faturamentos.value = data;
   });
@@ -47,10 +39,7 @@ function handleFaturamentoCadastrado() {
 </script>
 
 <template>
-  <!-- Este é o layout da nossa página principal (dashboard) -->
   <div class="space-y-8">
-    
-    <!-- Mensagens de Carregando e Erro -->
     <div v-if="carregando" class="text-center py-8">
       <p class="text-lg text-gray-500 animate-pulse">A carregar dados da API...</p>
     </div>
@@ -58,8 +47,6 @@ function handleFaturamentoCadastrado() {
       <p class="font-bold">Erro de Conexão</p>
       <p>{{ erroApi }}</p>
     </div>
-
-    <!-- Corpo principal da página, que usa os componentes "trabalhadores" -->
     <div v-else class="space-y-8">
       <FormularioCadastro 
         :operacoes="operacoes" 
@@ -69,6 +56,5 @@ function handleFaturamentoCadastrado() {
       <FaturamentosLista :faturamentos="faturamentos" />
       <OperacoesLista :operacoes="operacoes" />
     </div>
-    
   </div>
 </template>
