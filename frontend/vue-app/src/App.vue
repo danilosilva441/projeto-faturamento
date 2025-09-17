@@ -1,78 +1,69 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import type { Operacao, Faturamento } from '../types';
-import { getOperacoes, getFaturamentos } from './services/apiService';
-
-// Importa TODOS os nossos componentes filhos
-import FormularioCadastro from './components/FormularioCadastro.vue';
-import OperacoesLista from './components/OperacoesLista.vue';
-import FaturamentosLista from './components/FaturamentosLista.vue';
-import PainelAnalise from './components/PainelAnalise.vue'; // <-- O NOVO COMPONENTE
-
-// Estado central da aplicação (os dados que controlam tudo)
-const operacoes = ref<Operacao[]>([]);
-const faturamentos = ref<Faturamento[]>([]);
-const erroApi = ref<string | null>(null);
-const carregando = ref(true);
-
-// Função para carregar todos os dados da API
-async function carregarDados() {
-  try {
-    const [operacoesData, faturamentosData] = await Promise.all([
-      getOperacoes(),
-      getFaturamentos()
-    ]);
-    operacoes.value = operacoesData;
-    faturamentos.value = faturamentosData;
-  } catch (error) {
-    console.error('Falha ao carregar dados:', error);
-    erroApi.value = 'Não foi possível carregar os dados da API.';
-  } finally {
-    carregando.value = false;
-  }
-}
-
-onMounted(carregarDados);
-
-function handleFaturamentoCadastrado() {
-  getFaturamentos().then(data => {
-    faturamentos.value = data;
-  });
-}
+// Importa o componente <router-link> que nos permite criar links de navegação
+import { RouterLink, RouterView } from 'vue-router';
 </script>
 
 <template>
-  <div class="bg-gradient-to-br from-gray-50 to-slate-200 min-h-screen p-4 sm:p-8 font-sans">
-    <div class="max-w-4xl mx-auto space-y-8">
-      
-      <header class="text-center">
-        <h1 class="text-4xl font-extrabold text-slate-800">Painel de Faturamento</h1>
-        <p class="text-slate-600 mt-2">Uma aplicação Full-Stack com .NET, Vue e Microserviço Node.js.</p>
-      </header>
-      
-      <div v-if="carregando" class="text-center py-8">
-        <p class="text-lg text-gray-500 animate-pulse">Carregando dados da API...</p>
+  <!-- Layout principal da aplicação com Flexbox -->
+  <div class="flex h-screen bg-gray-100 font-sans">
+    
+    <!-- 1. Barra de Navegação Lateral (Sidebar) -->
+    <aside class="w-64 flex-shrink-0 bg-gray-800 text-white flex flex-col">
+      <div class="h-16 flex items-center justify-center text-xl font-bold border-b border-gray-700">
+        <span>Faturamento App</span>
       </div>
-      <div v-else-if="erroApi" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
-        <p class="font-bold">Erro de Conexão</p>
-        <p>{{ erroApi }}</p>
-      </div>
+      <nav class="flex-grow p-4 space-y-2">
+        <!-- 
+          <router-link> é o componente do Vue Router para criar links.
+          O atributo "to" define para qual rota o link aponta.
+          A classe "router-link-exact-active" é adicionada automaticamente pelo Vue Router
+          ao link que corresponde à página atual, permitindo-nos estilizá-lo de forma diferente.
+        -->
+        <router-link 
+          to="/" 
+          class="flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+          active-class="bg-indigo-600"
+        >
+          <!-- Ícone SVG para o link -->
+          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+          <span>Painel Principal</span>
+        </router-link>
 
-      <!-- Aqui o "chefe" (App.vue) usa todos os seus "trabalhadores" -->
-      <div v-else class="space-y-8">
-        <FormularioCadastro 
-          :operacoes="operacoes" 
-          @faturamento-cadastrado="handleFaturamentoCadastrado" 
-        />
+        <router-link 
+          to="/lancamentos" 
+          class="flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+          active-class="bg-indigo-600"
+        >
+          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <span>Lançamentos</span>
+        </router-link>
         
-        <!-- O NOSSO NOVO PAINEL EM AÇÃO -->
-        <!-- Passamos a lista de operações para que ele possa preencher o seu dropdown -->
-        <PainelAnalise :operacoes="operacoes" />
+        <router-link 
+          to="/metas" 
+          class="flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+          active-class="bg-indigo-600"
+        >
+          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          <span>Metas</span>
+        </router-link>
+      </nav>
+    </aside>
 
-        <FaturamentosLista :faturamentos="faturamentos" />
-        <OperacoesLista :operacoes="operacoes" />
-      </div>
+    <!-- 2. Área de Conteúdo Principal -->
+    <main class="flex-1 overflow-y-auto p-8">
+      <!-- 
+        <router-view /> é o "espaço reservado" mágico. 
+        O Vue Router irá automaticamente renderizar o componente da página atual aqui.
+        Se estivermos em "/", ele mostrará a HomeView.
+        Se estivermos em "/lancamentos", ele mostrará a LancamentosView.
+      -->
+      <router-view />
+    </main>
 
-    </div>
   </div>
 </template>
+
+<style>
+/* Estilos globais podem ser adicionados aqui se necessário */
+</style>
+
