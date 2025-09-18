@@ -7,8 +7,8 @@ import type {
   ResultadoPrevisao, 
   RespostaPaginada, 
   ProgressoMeta, 
-  SalvarOperacaoPayload, // <-- Agora importado
-  FiltrosFaturamento      // <-- Agora importado
+  SalvarOperacaoPayload,
+  FiltrosFaturamento
 } from '../types';
 
 const API_URL = 'http://localhost:5013/api';

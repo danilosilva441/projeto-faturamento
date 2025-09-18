@@ -44,7 +44,8 @@ export interface RespostaPaginada<T> {
   items: T[];
 }
 
-// --- NOVAS INTERFACES (MOVIDAS PARA AQUI) ---
+// --- INTERFACES QUE ESTAVAM EM FALTA ---
+
 // Define a "forma" dos dados para criar/atualizar uma operação
 export interface SalvarOperacaoPayload {
   nome: string;
