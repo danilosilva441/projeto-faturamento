@@ -1,3 +1,5 @@
+
+
 <script setup lang="ts">
 // A única coisa que este ficheiro precisa de importar são os componentes do router
 import { RouterLink, RouterView } from 'vue-router';
