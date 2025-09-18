@@ -1,10 +1,11 @@
+// Este ficheiro serve como um "dicionário" central para todos os tipos do nosso projeto.
 export interface Operacao {
   id: number;
   nome: string;
   descricao: string | null;
   ativo: boolean;
   criadoEm: string;
-  metaMensal: number; // A nova meta mensal
+  metaMensal: number;
 }
 
 export interface Faturamento {
@@ -41,5 +42,22 @@ export interface RespostaPaginada<T> {
   paginaAtual: number;
   totalPaginas: number;
   items: T[];
+}
+
+// --- NOVAS INTERFACES (MOVIDAS PARA AQUI) ---
+// Define a "forma" dos dados para criar/atualizar uma operação
+export interface SalvarOperacaoPayload {
+  nome: string;
+  descricao: string | null;
+  metaMensal: number;
+}
+
+// Define a "forma" dos filtros para a busca de faturamentos
+export interface FiltrosFaturamento {
+  operacaoId?: number | null;
+  dataInicio?: string | null;
+  dataFim?: string | null;
+  pagina?: number;
+  tamanhoPagina?: number;
 }
 

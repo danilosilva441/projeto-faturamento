@@ -13,25 +13,38 @@ import ProgressoMeta from '../components/ProgressoMeta.vue';
 
 // --- ESTADO DA PÁGINA ---
 const operacoes = ref<Operacao[]>([]);
-const faturamentos = ref<Faturamento[]>([]);
+const faturamentos = ref<Faturamento[]>([]); // Continua a ser uma lista simples para exibição
 const erroApi = ref<string | null>(null);
 const carregando = ref(true);
 
-// --- LÓGICA DE DADOS ---
+// --- LÓGICA DE DADOS (CORRIGIDA E SIMPLIFICADA) ---
+
+// Função para buscar a lista de faturamentos (apenas a primeira página para o dashboard)
+async function buscarFaturamentosIniciais() {
+  try {
+    // 1. CORREÇÃO: Chamamos a função com os filtros para a primeira página.
+    const respostaPaginada = await getFaturamentos({ pagina: 1, tamanhoPagina: 10 });
+    // 2. CORREÇÃO: Extraímos apenas a lista de 'items' da resposta.
+    faturamentos.value = respostaPaginada.items;
+  } catch (error) {
+    console.error('Falha ao buscar faturamentos:', error);
+    // Lançamos o erro para que a função principal o possa apanhar
+    throw error;
+  }
+}
+
 // Função para carregar todos os dados necessários para a página
 async function carregarDados() {
   carregando.value = true;
   erroApi.value = null;
   try {
-    // Busca os dados em paralelo para ser mais rápido
-    const [operacoesData, faturamentosPaginados] = await Promise.all([
-      getOperacoes(),
-      getFaturamentos({ pagina: 1, tamanhoPagina: 10 }) // Busca a primeira página de faturamentos
+    // Busca as operações e os faturamentos iniciais em paralelo para ser mais rápido
+    // e de forma mais limpa, usando apenas async/await.
+    await Promise.all([
+      getOperacoes().then(data => { operacoes.value = data }),
+      buscarFaturamentosIniciais()
     ]);
-    operacoes.value = operacoesData;
-    faturamentos.value = faturamentosPaginados.items;
   } catch (error) {
-    console.error('Falha ao carregar dados:', error);
     erroApi.value = 'Não foi possível carregar os dados da API.';
   } finally {
     carregando.value = false;
@@ -41,19 +54,16 @@ async function carregarDados() {
 // Carrega os dados assim que a página é montada no ecrã
 onMounted(carregarDados);
 
-// Função para recarregar a lista de faturamentos após um novo cadastro
+// 3. CORREÇÃO: A função de atualização também foi corrigida para usar a nova lógica.
+// Ela simplesmente chama a mesma função que busca a primeira página de faturamentos.
 async function handleFaturamentoCadastrado() {
-  try {
-    const respostaPaginada = await getFaturamentos({ pagina: 1, tamanhoPagina: 10 });
-    faturamentos.value = respostaPaginada.items;
-  } catch(error) {
-    console.error('Falha ao recarregar faturamentos:', error);
-  }
+  console.log('Novo faturamento cadastrado! A recarregar a lista...');
+  await buscarFaturamentosIniciais();
 }
 </script>
 
 <template>
-  <!-- Este é o layout da nossa página principal (dashboard) -->
+  <!-- O layout da página principal (dashboard) não sofreu alterações -->
   <div class="space-y-8">
     
     <div v-if="carregando" class="text-center py-8">
@@ -64,7 +74,6 @@ async function handleFaturamentoCadastrado() {
       <p>{{ erroApi }}</p>
     </div>
 
-    <!-- Corpo principal da página, que usa os componentes "trabalhadores" -->
     <div v-else class="space-y-8">
       <ProgressoMeta :operacoes="operacoes" />
       <FormularioCadastro 

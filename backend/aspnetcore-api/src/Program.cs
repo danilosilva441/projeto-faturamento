@@ -4,16 +4,13 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- INÍCIO DA CONFIGURAÇÃO DO HTTP CLIENT ---
-// Adiciona o serviço IHttpClientFactory, que gere os clientes HTTP.
+// Configuração do IHttpClientFactory para o microserviço
 builder.Services.AddHttpClient("AnalysisService", client =>
 {
-    // Define o "endereço base" do nosso microserviço Node.js
     client.BaseAddress = new Uri("http://localhost:3000/");
 });
-// --- FIM DA CONFIGURAÇÃO DO HTTP CLIENT ---
 
-// Configuração dos Controllers com a Serialização JSON
+// Configuração dos Controllers com a serialização JSON correta
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -27,7 +24,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://localhost:5173")
+                          policy.WithOrigins("http://localhost:5173") // A porta do Vue
                                 .AllowAnyHeader()
                                 .AllowAnyMethod();
                       });
@@ -50,9 +47,29 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// --- INÍCIO DA CONFIGURAÇÃO PARA SPA ---
+
+// 1. Diz ao ASP.NET para servir ficheiros estáticos (como index.html, css, js).
+//    Em produção, o build do seu Vue ficaria numa pasta como 'wwwroot'.
+app.UseStaticFiles();
+
 app.UseCors(MyAllowSpecificOrigins);
+
+// A API continua a usar o seu próprio roteamento
+app.UseRouting();
+
 app.UseAuthorization();
+
+// Mapeia os controllers da API (ex: /api/faturamentos, /api/operacoes)
 app.MapControllers();
+
+// 2. A LINHA MÁGICA:
+//    Se nenhuma rota de API corresponder ao pedido do navegador,
+//    devolva o ficheiro principal do Vue (`index.html`).
+//    Isto permite que o Vue Router assuma o controlo da navegação no browser.
+app.MapFallbackToFile("index.html");
+
+// --- FIM DA CONFIGURAÇÃO PARA SPA ---
 
 app.Run();
 
