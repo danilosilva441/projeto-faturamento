@@ -9,6 +9,7 @@ import FormularioCadastro from '../components/FormularioCadastro.vue';
 import OperacoesLista from '../components/OperacoesLista.vue';
 import FaturamentosLista from '../components/FaturamentosLista.vue';
 import PainelAnalise from '../components/PainelAnalise.vue';
+import ProgressoMeta from '../components/ProgressoMeta.vue';
 
 // --- ESTADO DA PÁGINA ---
 const operacoes = ref<Operacao[]>([]);
@@ -16,23 +17,19 @@ const faturamentos = ref<Faturamento[]>([]);
 const erroApi = ref<string | null>(null);
 const carregando = ref(true);
 
-// --- LÓGICA DE DADOS (CORRIGIDA E SIMPLIFICADA) ---
+// --- LÓGICA DE DADOS ---
 // Função para carregar todos os dados necessários para a página
 async function carregarDados() {
   carregando.value = true;
   erroApi.value = null;
   try {
-    // Busca as operações e os faturamentos iniciais em paralelo para ser mais rápido
-    // e de forma mais limpa, usando apenas async/await.
-    const [operacoesData, faturamentosPaginadosData] = await Promise.all([
+    // Busca os dados em paralelo para ser mais rápido
+    const [operacoesData, faturamentosPaginados] = await Promise.all([
       getOperacoes(),
       getFaturamentos({ pagina: 1, tamanhoPagina: 10 }) // Busca a primeira página de faturamentos
     ]);
-
-    // Atribui os resultados às nossas variáveis de estado
     operacoes.value = operacoesData;
-    faturamentos.value = faturamentosPaginadosData.items;
-
+    faturamentos.value = faturamentosPaginados.items;
   } catch (error) {
     console.error('Falha ao carregar dados:', error);
     erroApi.value = 'Não foi possível carregar os dados da API.';
@@ -46,7 +43,6 @@ onMounted(carregarDados);
 
 // Função para recarregar a lista de faturamentos após um novo cadastro
 async function handleFaturamentoCadastrado() {
-  console.log('Novo faturamento cadastrado! A recarregar a lista...');
   try {
     const respostaPaginada = await getFaturamentos({ pagina: 1, tamanhoPagina: 10 });
     faturamentos.value = respostaPaginada.items;
@@ -57,7 +53,7 @@ async function handleFaturamentoCadastrado() {
 </script>
 
 <template>
-  <!-- O layout da página principal (dashboard) não sofreu alterações -->
+  <!-- Este é o layout da nossa página principal (dashboard) -->
   <div class="space-y-8">
     
     <div v-if="carregando" class="text-center py-8">
@@ -68,7 +64,9 @@ async function handleFaturamentoCadastrado() {
       <p>{{ erroApi }}</p>
     </div>
 
+    <!-- Corpo principal da página, que usa os componentes "trabalhadores" -->
     <div v-else class="space-y-8">
+      <ProgressoMeta :operacoes="operacoes" />
       <FormularioCadastro 
         :operacoes="operacoes" 
         @faturamento-cadastrado="handleFaturamentoCadastrado" 

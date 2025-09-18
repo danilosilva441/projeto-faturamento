@@ -23,12 +23,12 @@ namespace FaturamentoApi.Models
         [Column("criado_em")]
         public DateTime CriadoEm { get; set; }
 
-        // --- NOVA PROPRIEDADE ---
+        // --- PROPRIEDADE ATUALIZADA ---
         [Column("meta_mensal")]
         public decimal MetaMensal { get; set; }
-
 
         // Relação: Uma operação tem muitos faturamentos
         public virtual ICollection<FaturamentoDiario> Faturamentos { get; set; } = new List<FaturamentoDiario>();
     }
 }
+

@@ -1,16 +1,19 @@
 <script setup lang="ts">
-// A única coisa que este ficheiro precisa de importar são os componentes do router
+// Importa os componentes do Vue Router necessários para a navegação
 import { RouterLink, RouterView } from 'vue-router';
 </script>
 
 <template>
+  <!-- Layout principal da aplicação com Flexbox -->
   <div class="flex h-screen bg-gray-100 font-sans">
     
+    <!-- 1. Barra de Navegação Lateral (Sidebar) -->
     <aside class="w-64 flex-shrink-0 bg-gray-800 text-white flex flex-col">
       <div class="h-16 flex items-center justify-center text-xl font-bold border-b border-gray-700">
         <span>Faturamento App</span>
       </div>
       <nav class="flex-grow p-4 space-y-2">
+        <!-- Links de Navegação -->
         <router-link to="/" class="flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors" active-class="bg-indigo-600">
           <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
           <span>Painel Principal</span>
@@ -26,8 +29,14 @@ import { RouterLink, RouterView } from 'vue-router';
       </nav>
     </aside>
 
+    <!-- 2. Área de Conteúdo Principal -->
     <main class="flex-1 overflow-y-auto p-8">
-      <!-- O router vai renderizar a página correta aqui -->
+      <!-- 
+        ESTA É A LINHA MÁGICA.
+        O Vue Router irá automaticamente renderizar o componente da página atual aqui.
+        Se estivermos em "/", ele mostrará a HomeView.
+        Se estivermos em "/lancamentos", ele mostrará a LancamentosView.
+      -->
       <router-view />
     </main>
 

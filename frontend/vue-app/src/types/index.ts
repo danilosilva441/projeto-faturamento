@@ -1,11 +1,10 @@
-// Este ficheiro serve como um "dicionário" para o nosso projeto.
 export interface Operacao {
   id: number;
   nome: string;
   descricao: string | null;
   ativo: boolean;
   criadoEm: string;
-  metaMensal: number;
+  metaMensal: number; // A nova meta mensal
 }
 
 export interface Faturamento {
@@ -37,13 +36,10 @@ export interface ProgressoMeta {
   mesReferencia: string;
 }
 
-// --- NOVA INTERFACE PARA RESPOSTAS PAGINADAS ---
-// Esta é uma "interface genérica". O <T> significa que ela pode conter
-// uma lista de qualquer tipo (seja Faturamento, Operacao, etc.).
 export interface RespostaPaginada<T> {
   totalItems: number;
   paginaAtual: number;
   totalPaginas: number;
-  items: T[]; // A lista de itens da página atual
+  items: T[];
 }
 
